@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Assignment</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <style>
+       .card {
+            width: 18rem;
+            height: 28rem; 
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card-img-top {
+            width: 100%;
+            height: 10rem;
+            object-fit: cover;
+        }
+
+        .card-body {
+            flex: 1 1 auto; 
+            overflow-y: auto;
+        }
+
+        .container {
+            background-color: darkslategray;
+        }
+    </style>
+</head>
+
+<body>
+    <script>
+        async function fun(){
+            try {
+                let res = await fetch("https://restcountries.com/v3.1/all");
+                let res1 = await res.json();
+                foo(res1);
+            }
+            catch(error){
+                console.log(error);
+            }
+        }
+        fun();
+
+        async function weather(lat, lon, cardBody){
+            try{
+                let weather = await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=6f358863f6aff7588e315b43044c0c9b`);
+                let weather1 = await weather.json();
+                let temp = weather1.main.temp;
+                let tempElement = document.createElement('p');
+                tempElement.className = 'card-text';
+                tempElement.innerHTML = `Temperature: ${temp}`;
+                cardBody.appendChild(tempElement);
+            }
+            catch(error){
+                console.log(error);
+            }
+        }
+
+        function foo(data) {
+            var container = document.createElement("div");
+            container.className = "container";
+
+            var row = document.createElement("div");
+            row.className = "row g-4";
+
+            data.forEach((country, index) => {
+                var col = document.createElement("div");
+                col.className = "col-lg-4 col-sm-12";
+                let latlngText = country.latlng ? country.latlng : 'N/A';
+                col.innerHTML = `<div class="card" style="width: 18rem;">
+                            <img src="${country.flags.png}" class="card-img-top" alt="...">
+                            <div class="card-body">
+                            <h5 class="card-title">${country.name.common}</h5>
+                            <p class="card-text">Capital: ${country.capital ? country.capital : 'N/A'}</p>
+                            <p class="card-text">Region: ${country.region}</p>
+                            <p class="card-text">LatLong: ${latlngText}</p>
+                            <p class="card-text">CountryCode: ${country.cca3}</p>                            
+                            <button type="button" class="btn btn-primary">Click for Weather</button>
+                            </div>
+                        </div>`;
+                
+                let button = col.querySelector('button');
+                let cardBody = col.querySelector('.card-body');
+                
+                if (country.latlng) {
+                    button.addEventListener('click', () => {                        
+                        let [lat, lon] = country.latlng;
+                        weather(lat, lon, cardBody);
+                    });
+                } else {
+                    button.disabled = true;
+                }
+                
+                row.append(col);
+            });
+            container.append(row);
+            document.body.append(container);
+        }
+    </script>
+</body>
+
+</html>
